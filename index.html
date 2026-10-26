@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Corner Cafe Billing</title>
+<script>
+  /* ====== CORNER CAFE SETTINGS ======
+     Paste your Apps Script Web app URL between the quotes below (it ends with /exec). */
+  window.CC_SERVER_URL = "https://script.google.com/macros/s/AKfycbxHBM8upBaE6Gjx6kkqlyRKEpoGqqCISD5x2zuCc8JOSI3ZU4Wz096VzKbh_6brUEyp/exec";
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -310,6 +315,34 @@ td.mono{font-family:var(--mono)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
 
+/* ===== Online orders ===== */
+.bx-online{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.bx-plat{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.bx-plat button{border:1px solid var(--line);background:var(--panel-2);border-radius:8px;padding:7px 2px;font-weight:700;font-size:12px;color:var(--ink-2)}
+.bx-plat button[aria-pressed="true"]{background:var(--gold-soft);border-color:var(--gold);color:var(--gold)}
+.bx-online input{min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);font-size:13px}
+.bx-onlinenote{margin:10px 12px 0;padding:10px 12px;border-radius:10px;background:var(--gold-soft);color:var(--ink-2);font-size:12.5px;font-weight:600;border:1px dashed var(--gold)}
+#lines.online .each .pr,#lines.online .amt{display:none}
+.pill.zomato,.pill.swiggy,.pill.other{background:var(--gold-soft);color:var(--gold)}
+#stats{grid-template-columns:repeat(5,minmax(0,1fr))}
+#v-sales th,#v-sales td{padding:10px 10px}
+@media (max-width:1100px){#stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:640px){#stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* ===== Cloud / login ===== */
+.acct{display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#eaf6f4;border-radius:999px;padding:6px 12px;font-weight:700;font-size:12px;white-space:nowrap}
+.acct .dot{width:8px;height:8px;border-radius:50%;background:#4cc26a;box-shadow:0 0 0 3px rgba(76,194,106,.25)}
+.acct .dot.off{background:#ef7a64;box-shadow:0 0 0 3px rgba(239,122,100,.25)}
+.loginwrap{position:fixed;inset:0;z-index:80;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow-y:auto}
+.loginbox{width:100%;max-width:400px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;display:grid;gap:12px;box-shadow:var(--shadow)}
+.loginlogo{width:200px;justify-self:center;border-radius:8px}
+.loginbox h2{margin:4px 0 0;font-size:20px}
+.loginbox .field input{padding:11px 12px}
+.err{color:var(--danger);font-size:13px;font-weight:600;min-height:1em}
+body.staff .admin-only{display:none!important}
+body.cloud .local-only{display:none!important}
+.offline-tag{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--gold-soft);color:var(--gold);font-size:11px;font-weight:700}
+
 /* ===== Bill panel v2 ===== */
 .bill{border-radius:16px;overflow:hidden;height:calc(100vh - 100px);min-height:560px;max-height:none;overflow-y:auto;border-color:var(--line)}
 @media (max-width:980px){.bill{height:auto;min-height:0}}
@@ -397,8 +430,22 @@ td.mono{font-family:var(--mono)}
       <button class="tab" role="tab" aria-selected="false" data-view="settings">Settings</button>
     </nav>
     <div class="clock num" id="clock"></div>
+    <button class="acct" id="acct" hidden title="Signed in. Tap to sign out."><span class="dot" id="acctdot"></span><span id="acctname"></span></button>
   </div>
 </header>
+
+<div class="loginwrap" id="loginwrap" hidden>
+  <form class="loginbox" id="loginform">
+    <img src="data:image/jpeg;base64,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" alt="Corner Cafe" class="loginlogo">
+    <h2>Sign in to billing</h2>
+    <p class="hint">Every bill you make is saved to the cafe's Google Sheet with your name.</p>
+    <div class="field" id="l-urlwrap" hidden><label for="l-url">Server link (Apps Script web app URL)</label><input id="l-url" placeholder="https://script.google.com/macros/s/…/exec"></div>
+    <div class="field"><label for="l-name">Your name</label><input id="l-name" autocomplete="name" placeholder="e.g. Priya" required></div>
+    <div class="field"><label for="l-pin">PIN</label><input id="l-pin" type="password" inputmode="numeric" placeholder="Team or owner PIN" required></div>
+    <div class="err" id="l-err"></div>
+    <button class="btn btn-primary" id="l-go" type="submit">Sign in</button>
+  </form>
+</div>
 
 <main class="wrap">
   <!-- BILLING -->
@@ -424,17 +471,26 @@ td.mono{font-family:var(--mono)}
         <div class="bx-type" id="otype" role="group" aria-label="Order type">
           <button aria-pressed="true" data-v="Dine-in"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 3v8a2 2 0 0 0 2 2h1v8M8 3v6M6 3v6M17 3c-2 2-2 6 0 8v10"/></svg>Dine-in</button>
           <button aria-pressed="false" data-v="Takeaway"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 13H7L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>Takeaway</button>
-          <button aria-pressed="false" data-v="Parcel"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/></svg>Parcel</button>
+          <button aria-pressed="false" data-v="Online"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>Online</button>
         </div>
       </div>
-      <div class="bx-cust">
+      <div class="bx-cust" id="custwrap">
         <input id="cname" placeholder="Customer name" aria-label="Customer name">
         <input id="cphone" inputmode="numeric" maxlength="10" placeholder="Mobile" aria-label="Mobile number">
         <div id="tablewrap"><input id="tableno" placeholder="Table" aria-label="Table number"></div>
       </div>
+      <div class="bx-online" id="onlinewrap" hidden>
+        <div class="bx-plat" id="platform" role="group" aria-label="Online platform">
+          <button aria-pressed="true" data-v="Zomato">Zomato</button>
+          <button aria-pressed="false" data-v="Swiggy">Swiggy</button>
+          <button aria-pressed="false" data-v="Other">Other</button>
+        </div>
+        <input id="orderid" placeholder="Order ID (e.g. 5123)" aria-label="Online order ID">
+      </div>
       <div class="lines" id="lines"></div>
       <div class="bill-foot">
-        <div class="bx-sum">
+        <div class="bx-onlinenote" id="onlinenote" hidden>Online order · paid on the app. The slip shows items only, without prices.</div>
+        <div class="bx-sum" id="sumwrap">
           <div class="trow"><span>Subtotal</span><b id="t-sub" class="num">₹0.00</b></div>
           <div class="trow"><span class="disc">Discount
             <input id="disc" type="number" min="0" value="0" aria-label="Discount">
@@ -445,9 +501,9 @@ td.mono{font-family:var(--mono)}
           <div class="trow" id="r-sgst" hidden><span id="l-sgst"></span><b id="t-sgst"></b></div>
           <div class="trow" id="r-round"><span>Round off</span><b id="t-round" class="num">₹0.00</b></div>
         </div>
-        <div class="bx-total"><span>To pay</span><b id="t-total" class="num">₹0</b></div>
+        <div class="bx-total" id="totalwrap"><span>To pay</span><b id="t-total" class="num">₹0</b></div>
         <div class="pay">
-          <div class="bx-pay" id="pmode" role="group" aria-label="Payment mode">
+          <div class="bx-pay" id="pmode" role="group" aria-label="Payment mode" data-hideonline>
             <button aria-pressed="false" data-v="Cash"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>Cash</button>
             <button aria-pressed="true" data-v="UPI"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v7h-7v-3M17 21v0"/></svg>UPI</button>
             <button aria-pressed="false" data-v="Card"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>Card</button>
@@ -476,7 +532,7 @@ td.mono{font-family:var(--mono)}
           </div>
         </div>
         <div class="tablewrap"><table>
-          <thead><tr><th>Bill no.</th><th>Time</th><th>Customer</th><th>Type</th><th>Pay</th><th class="r">Items</th><th class="r">Amount</th><th></th></tr></thead>
+          <thead><tr><th>Bill no.</th><th>Time</th><th>Billed by</th><th>Customer</th><th>Type</th><th>Pay</th><th class="r">Items</th><th class="r">Amount</th><th></th></tr></thead>
           <tbody id="rtable"></tbody>
         </table></div>
       </div>
@@ -515,7 +571,7 @@ td.mono{font-family:var(--mono)}
         </div>
       </div>
       <div style="display:grid;gap:18px">
-        <div class="card">
+        <div class="card" id="reqcard" hidden>
           <div class="card-h"><h3>Employee requests</h3><button class="btn btn-ghost" id="reqrefresh" style="padding:6px 12px">Refresh</button></div>
           <div class="hint" id="reqsync" style="padding:10px 16px 0"></div>
           <div id="reqs" class="reqs"></div>
@@ -563,41 +619,44 @@ td.mono{font-family:var(--mono)}
     <div class="card">
       <div class="card-h"><h3>Receipt details</h3><span class="hint">Printed on every receipt.</span></div>
       <div class="settings">
-        <div class="field"><label for="s-name">Cafe name</label><input id="s-name"></div>
-        <div class="field"><label for="s-phone">Phone</label><input id="s-phone"></div>
-        <div class="field full"><label for="s-addr">Address</label><input id="s-addr"></div>
-        <div class="field"><label for="s-gstin">GSTIN</label><input id="s-gstin" placeholder="29XXXXX0000X1Z5"></div>
-        <div class="field"><label for="s-fssai">FSSAI licence no.</label><input id="s-fssai"></div>
-        <div class="field"><label for="s-upi">UPI ID (shown on receipt)</label><input id="s-upi" placeholder="cornercafe@upi"></div>
-        <div class="field"><label for="s-prefix">Bill number prefix</label><input id="s-prefix"></div>
-        <div class="field full"><label for="s-foot">Footer message</label><input id="s-foot"></div>
+        <div class="field admin-only"><label for="s-name">Cafe name</label><input id="s-name"></div>
+        <div class="field admin-only"><label for="s-phone">Phone</label><input id="s-phone"></div>
+        <div class="field full admin-only"><label for="s-addr">Address</label><input id="s-addr"></div>
+        <div class="field admin-only"><label for="s-gstin">GSTIN</label><input id="s-gstin" placeholder="29XXXXX0000X1Z5"></div>
+        <div class="field admin-only"><label for="s-fssai">FSSAI licence no.</label><input id="s-fssai"></div>
+        <div class="field admin-only"><label for="s-upi">UPI ID (shown on receipt)</label><input id="s-upi" placeholder="cornercafe@upi"></div>
+        <div class="field admin-only"><label for="s-prefix">Bill number prefix</label><input id="s-prefix"></div>
+        <div class="field full admin-only"><label for="s-foot">Footer message</label><input id="s-foot"></div>
         <div class="field"><label for="s-paper">Receipt paper</label><select id="s-paper">
           <option value="80">80 mm thermal roll (3 inch)</option>
           <option value="58">58 mm thermal roll (2 inch)</option>
           <option value="a4">A4 sheet (normal printer)</option></select></div>
         <div class="field"><label>&nbsp;</label><span class="hint" style="padding-top:8px">Match this to the roll in your receipt printer.</span></div>
-        <label class="toggle full"><input type="checkbox" id="s-gst"> Charge GST (5% = CGST 2.5% + SGST 2.5%)</label>
-        <div class="full parcelbox">
-          <label class="toggle"><input type="checkbox" id="s-parcel"> Add parcel charge</label>
+        <label class="toggle full admin-only"><input type="checkbox" id="s-gst"> Charge GST (5% = CGST 2.5% + SGST 2.5%)</label>
+        <div class="full parcelbox admin-only">
+          <label class="toggle"><input type="checkbox" id="s-parcel"> Add parcel charge on Takeaway</label>
           <div class="parcel-grid" id="parcelfields">
             <div class="field"><label for="s-parcelamt">Parcel charge (₹)</label><input id="s-parcelamt" type="number" min="0" step="any" placeholder="e.g. 10"></div>
             <div class="field"><label for="s-parcelmode">Charge</label><select id="s-parcelmode"><option value="order">Once per order</option><option value="item">Per item (each plate/cup)</option></select></div>
-            <label class="toggle" style="align-self:end;padding-bottom:8px"><input type="checkbox" id="s-parceltk"> Also charge for Takeaway</label>
+            <span class="hint" style="align-self:end;padding-bottom:10px">Added to Takeaway bills. Online orders are not charged.</span>
           </div>
         </div>
-        <div class="full" style="display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px">
+        <div class="full local-only" style="display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px">
           <button class="btn btn-danger" id="wipe">Delete all receipts</button>
           <span class="hint" id="wipehint" style="align-self:center">Receipts and menu are saved in this browser on this device.</span>
         </div>
       </div>
     </div>
     <div class="card" style="margin-top:18px">
-      <div class="card-h"><h3>Grocery sync with employee</h3><span class="hint" id="syncstate">Not connected</span></div>
+      <div class="card-h"><h3>Google Sheet</h3><span class="hint" id="syncstate">Not connected</span></div>
       <div class="settings">
-        <div class="field full"><label for="s-syncurl">Apps Script web app URL</label><input id="s-syncurl" placeholder="https://script.google.com/macros/s/…/exec"></div>
-        <div class="field"><label for="s-synckey">Admin key</label><input id="s-synckey" type="password" placeholder="Same as ADMIN_KEY in Code.gs"></div>
-        <div class="field"><label>&nbsp;</label><button class="btn btn-primary" id="synctest" type="button">Connect &amp; share stock</button></div>
-        <div class="full hint">Your employee opens the same URL on his phone and logs in with the employee PIN. He sees grocery stock and sends buying requests, which appear in the Groceries tab here.</div>
+        <div class="field full" id="s-urlwrap"><label for="s-syncurl">Server link (Apps Script web app URL)</label><input id="s-syncurl" placeholder="https://script.google.com/macros/s/…/exec"></div>
+        <div class="full hint" id="cloudhelp">Bills, menu, settings and grocery stock are shared through the Google Sheet, so everyone using the team link sees the same data.</div>
+        <div class="full" style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" id="synctest" type="button">Connect</button>
+          <button class="btn btn-ghost" id="logout" type="button" hidden>Sign out</button>
+          <span class="hint" id="outboxnote" style="align-self:center"></span>
+        </div>
       </div>
     </div>
   </section>
@@ -718,7 +777,8 @@ const small=u=>u==="kg"?"g":u==="L"?"ml":u;
 const factor=u=>big(u)?1000:1;
 const fmt=(n,u)=>{const v=Math.round(n*100)/100;return (Number.isInteger(v)?v:v.toFixed(2).replace(/0$/,""))+" "+u};
 const gById=id=>groceries.find(g=>g.id===id);
-function saveG(){store.set("groceries",groceries);store.set("recipes",recipes);if(typeof schedulePush==="function")schedulePush()}
+function saveG(){store.set("groceries",groceries);store.set("recipes",recipes)}
+function saveRecipes(){saveG();if(typeof pushConfig==="function")pushConfig("recipes")}
 function gStatus(g){if(g.stock<=0)return["out","Finished"];if(g.stock<=g.alert)return["low","Low"];return["ok","In stock"]}
 function dishOut(m){return (recipes[m.id]||[]).some(([gid])=>{const g=gById(gid);return g&&g.stock<=0})}
 function dishLow(m){return (recipes[m.id]||[]).map(([gid])=>gById(gid)).filter(g=>g&&g.stock>0&&g.stock<=g.alert).map(g=>g.name)}
@@ -727,7 +787,7 @@ let settings=Object.assign({},DEFAULT_SET,store.get("settings",{}));
 let receipts=store.get("receipts",[]);
 let seq=store.get("seq",{});
 let cart={}; // id -> qty
-let cat="All", q="", otype="Dine-in", pmode="UPI";
+let cat="All", q="", otype="Dine-in", pmode="UPI", platform="Zomato";
 let lastReceipt=null;
 
 const $=s=>document.querySelector(s);
@@ -737,6 +797,16 @@ const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&g
 const dkey=d=>{const x=new Date(d);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0")};
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800)}
 
+function offlineNo(){
+  const d=new Date(),k="off"+dkey(d),n=(seq[k]||0)+1;seq[k]=n;store.set("seq",seq);
+  return `${settings.prefix||"CC"}-${String(d.getFullYear()).slice(2)}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}-OFF${n}`;
+}
+function deductLocal(r){
+  const use={};
+  r.lines.forEach(l=>(recipes[l.id]||[]).forEach(([gid,q])=>{const g=gById(gid);if(g)use[gid]=(use[gid]||0)+q*l.qty/factor(g.unit)}));
+  Object.entries(use).forEach(([gid,u])=>{const g=gById(gid);g.stock=Math.max(0,Math.round((g.stock-u)*1000)/1000)});
+  saveG();
+}
 function nextBillNo(peek){
   const d=new Date(), k=dkey(d);
   const n=(seq[k]||0)+1;
@@ -805,8 +875,13 @@ function calc(){
   const dv=Math.max(0,parseFloat($("#disc").value)||0);
   let disc=$("#disctype").value==="pct"?sub*Math.min(dv,100)/100:Math.min(dv,sub);
   disc=Math.round(disc*100)/100;
-  const pOn=settings.parcelOn&&(otype==="Parcel"||(settings.parcelTk&&otype==="Takeaway"))&&lines.length;
   const nItems=lines.reduce((a,l)=>a+l.qty,0);
+  if(otype==="Online"){
+    // online orders are paid on Zomato/Swiggy, so no amounts are recorded here
+    lines.forEach(l=>{l.price=0;l.amt=0});
+    return {lines,sub:0,disc:0,parcel:0,taxable:0,cgst:0,sgst:0,round:0,total:0,items:nItems,online:true};
+  }
+  const pOn=settings.parcelOn&&otype==="Takeaway"&&lines.length;
   const parcel=pOn?Math.round((parseFloat(settings.parcelAmt)||0)*(settings.parcelMode==="item"?nItems:1)*100)/100:0;
   const taxable=sub-disc+parcel;
   const cgst=settings.gst?Math.round(taxable*2.5)/100:0, sgst=cgst;
@@ -815,15 +890,19 @@ function calc(){
 }
 function renderBill(){
   const c=calc();
-  $("#billno").textContent=nextBillNo(true);
+  $("#billno").textContent=(typeof isCloud==="function"&&isCloud())?"New order":nextBillNo(true);
   $("#lines").innerHTML=c.lines.length?c.lines.map(l=>`
     <div class="line">
       <div class="stepper"><button data-id="${l.id}" data-d="-1" aria-label="Remove one">−</button><span>${l.qty}</span><button data-id="${l.id}" data-d="1" aria-label="Add one">+</button></div>
-      <div><div class="nm">${esc(l.name)}</div><div class="each">₹${l.price} × ${l.qty}<button class="line-x" data-id="${l.id}" data-d="${-l.qty}" aria-label="Remove ${esc(l.name)}">Remove</button></div></div>
+      <div><div class="nm">${esc(l.name)}</div><div class="each"><span class="pr">₹${l.price} × ${l.qty}</span><button class="line-x" data-id="${l.id}" data-d="${-l.qty}" aria-label="Remove ${esc(l.name)}">Remove</button></div></div>
       <div class="amt num">${inr(l.amt)}</div>
     </div>`).join(""):`<div class="cart-empty"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2l1.5 2L9 2l1.5 2L12 2l1.5 2L15 2l1.5 2L18 2v20l-1.5-2-1.5 2-1.5-2-1.5 2-1.5-2L9 22l-1.5-2L6 22z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg><b style="color:var(--ink-2)">No items yet</b>Tap + Add on any dish to start the order.</div>`;
   document.querySelectorAll("#lines [data-d]").forEach(b=>b.onclick=()=>add(b.dataset.id,+b.dataset.d));
   $("#bcount").textContent=`${c.items} item${c.items===1?"":"s"}`;
+  const on=!!c.online;
+  $("#lines").classList.toggle("online",on);
+  $("#custwrap").hidden=on;$("#onlinewrap").hidden=!on;$("#onlinenote").hidden=!on;
+  $("#sumwrap").hidden=on;$("#totalwrap").hidden=on;$("#pmode").hidden=on;$("#cashbox").hidden=on||pmode!=="Cash";
   $("#t-sub").textContent=inr(c.sub);
   $("#t-disc").textContent="−"+inr(c.disc);
   $("#r-parcel").hidden=!c.parcel;$("#t-parcel").textContent=inr(c.parcel);
@@ -834,13 +913,14 @@ function renderBill(){
   $("#t-round").textContent=(c.round>=0?"+":"−")+inr(Math.abs(c.round));
   $("#t-total").textContent=inr0(c.total);
   $("#checkout").disabled=!c.lines.length;
-  $("#checkout").textContent=c.lines.length?`Preview bill · ${inr0(c.total)}`:"Preview bill";
+  $("#checkout").textContent=on?(c.lines.length?`Preview order · ${c.items} item${c.items===1?"":"s"}`:"Preview order"):c.lines.length?`Preview bill · ${inr0(c.total)}`:"Preview bill";
   const recv=parseFloat($("#recv").value)||0;
   $("#chg").textContent=recv?inr0(Math.max(0,recv-c.total)):"₹0";
 }
 function seg(el,set){el.querySelectorAll("button").forEach(b=>b.onclick=()=>{el.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));set(b.dataset.v)})}
 seg($("#otype"),v=>{otype=v;$("#tablewrap").hidden=v!=="Dine-in";renderBill()});
 seg($("#pmode"),v=>{pmode=v;$("#cashbox").hidden=v!=="Cash";renderBill()});
+seg($("#platform"),v=>{platform=v});
 ["#disc","#disctype","#recv"].forEach(s=>$(s).addEventListener("input",renderBill));
 $("#q").addEventListener("input",e=>{q=e.target.value;renderGrid()});
 document.addEventListener("keydown",e=>{
@@ -855,12 +935,14 @@ $("#clear").onclick=()=>{
   if(!clearArmed){clearArmed=true;$("#clear").textContent="Tap again";setTimeout(()=>{clearArmed=false;$("#clear").textContent="Clear"},2500);return}
   resetBill();toast("Bill cleared");
 };
-function resetBill(){cart={};$("#disc").value=0;$("#recv").value="";$("#cname").value="";$("#cphone").value="";$("#tableno").value="";clearArmed=false;$("#clear").textContent="Clear";renderGrid();renderBill()}
+function resetBill(){cart={};$("#orderid").value="";$("#disc").value=0;$("#recv").value="";$("#cname").value="";$("#cphone").value="";$("#tableno").value="";clearArmed=false;$("#clear").textContent="Clear";renderGrid();renderBill()}
 
 $("#checkout").onclick=()=>{
   const c=calc();if(!c.lines.length)return;
-  const r={no:nextBillNo(true),ts:Date.now(),cust:$("#cname").value.trim(),phone:$("#cphone").value.trim(),type:otype,table:otype==="Dine-in"?$("#tableno").value.trim():"",
-    pay:pmode,recv:pmode==="Cash"?(parseFloat($("#recv").value)||0):0,gstOn:settings.gst,...c};
+  const online=otype==="Online";
+  const r={no:isCloud()?"Given on save":nextBillNo(true),ts:Date.now(),cust:online?"":$("#cname").value.trim(),phone:online?"":$("#cphone").value.trim(),type:otype,table:otype==="Dine-in"?$("#tableno").value.trim():"",
+    pay:online?platform:pmode,recv:!online&&pmode==="Cash"?(parseFloat($("#recv").value)||0):0,gstOn:online?false:settings.gst,
+    platform:online?platform:"",orderId:online?$("#orderid").value.trim():"",...c};
   showPreview(r);
 };
 let pending=null;
@@ -874,8 +956,28 @@ function showPreview(r){
   $("#overlay").hidden=false;$("#complete").focus();
 }
 $("#backedit").onclick=()=>{pending=null;closeModal()};
-$("#complete").onclick=()=>{
+$("#complete").onclick=async()=>{
   const r=pending;if(!r)return;
+  if(isCloud()){
+    const btn=$("#complete");btn.disabled=true;btn.textContent="Saving…";
+    const sale=Object.assign({},r,{clientId:"c"+Date.now().toString(36)+Math.random().toString(36).slice(2,7)});
+    try{
+      const j=await call("addSale",{sale});
+      r.no=j.no;r.ts=j.ts;r.staff=auth.name;
+      if(j.groceries)applyServer({groceries:j.groceries});
+      toast("Order saved to Google Sheet");
+    }catch(e){
+      if(e instanceof ServerError){toast(e.message);btn.disabled=false;btn.textContent="Complete order";return}
+      r.no=offlineNo();r.ts=Date.now();r.staff=auth.name;r.offline=true;
+      sale.offlineNo=r.no;sale.ts=r.ts;outbox.push(sale);store.set("outbox",outbox);
+      deductLocal(r);
+      toast("No internet. Bill saved here and will upload automatically.");
+    }finally{btn.disabled=false;btn.textContent="Complete order"}
+    receipts.push(r);receipts=receipts.slice(-300);store.set("receipts",receipts);
+    salesCache[dkey(r.ts)]=null;
+    pending=null;renderSync();
+    openReceipt(r,true);return;
+  }
   r.no=nextBillNo(false);r.ts=Date.now();
   receipts.push(r);store.set("receipts",receipts);
   const use={};
@@ -889,10 +991,20 @@ $("#complete").onclick=()=>{
 /* Receipt */
 function receiptHTML(r){
   const d=new Date(r.ts), S=settings;
+  if(r.type==="Online")return `<img class="logo" src="${LOGO_FULL}" alt="Corner Cafe">
+  <hr><div class="c" style="font-weight:600;letter-spacing:.15em">ONLINE ORDER</div><hr>
+  <div class="kv"><span>${esc(r.platform||r.pay)}</span><span>${r.orderId?"Order #"+esc(r.orderId):""}</span></div>
+  <div class="kv"><span>Ref: ${esc(r.no)}${r.offline?"*":""}</span><span>${d.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})}</span></div>
+  <div class="kv"><span>${d.toLocaleDateString("en-IN")}</span><span></span></div>
+  <hr>
+  <table><thead><tr><th style="text-align:left">Item</th><th style="text-align:right">Qty</th></tr></thead>
+  <tbody>${r.lines.map(l=>`<tr><td>${esc(l.name)}</td><td style="text-align:right;font-weight:600">${l.qty}</td></tr>`).join("")}</tbody></table>
+  <hr><div class="kv grand"><span>TOTAL ITEMS</span><span>${r.items}</span></div><hr>
+  <div class="thanks">${esc(S.foot)}</div><div class="tag">CRAFTED FOR CRAVINGS</div>`;
   return `<img class="logo" src="${LOGO_FULL}" alt="Corner Cafe">
   <div class="addr">${esc(S.addr)}<br>Ph: ${esc(S.phone)}${S.gstin?`<br>GSTIN: ${esc(S.gstin)}`:""}${S.fssai?`<br>FSSAI: ${esc(S.fssai)}`:""}</div>
   <hr><div class="c" style="font-weight:600;letter-spacing:.15em">${r.gstOn?"TAX INVOICE":"RECEIPT"}</div><hr>
-  <div class="kv"><span>Bill: ${esc(r.no)}</span><span>${esc(r.type)}${r.table?" · "+esc(r.table):""}</span></div>
+  <div class="kv"><span>Bill: ${esc(r.no)}${r.offline?"*":""}</span><span>${esc(r.type)}${r.table?" · "+esc(r.table):""}</span></div>
   <div class="kv"><span>${d.toLocaleDateString("en-IN")}</span><span>${d.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})}</span></div>
   ${r.cust||r.phone?`<div class="kv"><span>${esc(r.cust||"Customer")}</span><span>${esc(r.phone)}</span></div>`:""}
   <hr>
@@ -912,6 +1024,7 @@ function receiptHTML(r){
 }
 function receiptText(r){
   const d=new Date(r.ts);
+  if(r.type==="Online")return `*${settings.name} – ${r.platform||r.pay} order${r.orderId?" #"+r.orderId:""}*\n${d.toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"})}\n\n`+r.lines.map(l=>`${l.name} x${l.qty}`).join("\n")+`\n\nTotal items: ${r.items}`;
   let t=`*${settings.name}*\nBill ${r.no} · ${d.toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"})}\n\n`;
   r.lines.forEach(l=>t+=`${l.name} x${l.qty} = ₹${l.amt}\n`);
   if(r.disc)t+=`Discount: -₹${r.disc.toFixed(2)}\n`;
@@ -963,41 +1076,58 @@ function copy(text,msg){
 
 /* Sales */
 $("#sday").value=dkey(Date.now());
-$("#sday").addEventListener("change",renderSales);
-function renderSales(){
+$("#sday").addEventListener("change",()=>renderSales());
+const salesCache={};
+function dayList(day){
+  if(!isCloud())return receipts.filter(r=>dkey(r.ts)===day);
+  const server=salesCache[day]||[], nos=new Set(server.map(r=>r.no));
+  return server.concat(receipts.filter(r=>r.offline&&dkey(r.ts)===day&&!nos.has(r.no)));
+}
+async function renderSales(quiet){
   const day=$("#sday").value||dkey(Date.now());
-  const list=receipts.filter(r=>dkey(r.ts)===day).sort((a,b)=>b.ts-a.ts);
-  const total=list.reduce((a,r)=>a+r.total,0);
+  if(isCloud()){
+    if(!salesCache[day]||quiet!==undefined){
+      if(!salesCache[day])$("#rtable").innerHTML=`<tr><td colspan="9" style="text-align:center;color:var(--ink-3);padding:30px">Loading bills from Google Sheet…</td></tr>`;
+      try{const from=new Date(day+"T00:00").getTime();const j=await call("getSales",{from,to:from+86400000});salesCache[day]=j.sales}
+      catch(e){if(!salesCache[day]){salesCache[day]=receipts.filter(r=>dkey(r.ts)===day);if(!quiet)toast("Offline · showing bills made on this device")}}
+    }
+    if(($("#sday").value||dkey(Date.now()))!==day)return;
+  }
+  const list=dayList(day).sort((a,b)=>b.ts-a.ts);
+  const paid=list.filter(r=>r.type!=="Online"), onl=list.filter(r=>r.type==="Online");
+  const total=paid.reduce((a,r)=>a+r.total,0);
+  const plat=p=>onl.filter(r=>(r.platform||r.pay)===p).length;
   const by=p=>list.filter(r=>r.pay===p).reduce((a,r)=>a+r.total,0);
   const gst=list.reduce((a,r)=>a+r.cgst+r.sgst,0);
   const isToday=day===dkey(Date.now());
   $("#stats").innerHTML=`
-    <div class="stat hero"><div class="k">${isToday?"Today's sales":"Sales"}</div><div class="v num">${inr0(total)}</div><div class="s">${list.length} bills · avg ${inr0(list.length?total/list.length:0)}</div></div>
+    <div class="stat hero"><div class="k">${isToday?"Today's counter sales":"Counter sales"}</div><div class="v num">${inr0(total)}</div><div class="s">${paid.length} bills · GST ${inr(gst)}</div></div>
     <div class="stat"><div class="k">UPI</div><div class="v num">${inr0(by("UPI"))}</div><div class="s">${list.filter(r=>r.pay==="UPI").length} bills</div></div>
     <div class="stat"><div class="k">Cash in drawer</div><div class="v num">${inr0(by("Cash"))}</div><div class="s">${list.filter(r=>r.pay==="Cash").length} bills</div></div>
-    <div class="stat"><div class="k">GST collected</div><div class="v num">${inr(gst)}</div><div class="s">Card ${inr0(by("Card"))}</div></div>`;
+    <div class="stat"><div class="k">Card</div><div class="v num">${inr0(by("Card"))}</div><div class="s">${list.filter(r=>r.pay==="Card").length} bills</div></div>
+    <div class="stat"><div class="k">Online orders</div><div class="v num">${onl.length}</div><div class="s">Zomato ${plat("Zomato")} · Swiggy ${plat("Swiggy")}${plat("Other")?" · Other "+plat("Other"):""}</div></div>`;
   $("#rtable").innerHTML=list.length?list.map(r=>`<tr>
-    <td class="mono">${esc(r.no)}</td><td class="mono">${new Date(r.ts).toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})}</td>
-    <td>${esc(r.cust||"Walk-in")}</td><td>${esc(r.type)}${r.table?" · "+esc(r.table):""}</td>
+    <td class="mono">${esc(r.no)}${r.offline?`<span class="offline-tag">not uploaded</span>`:""}</td><td class="mono">${new Date(r.ts).toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})}</td>
+    <td>${esc(r.staff||"—")}</td><td>${r.type==="Online"?"—":esc(r.cust||"Walk-in")}</td><td>${r.type==="Online"?"Online"+(r.orderId?" · #"+esc(r.orderId):""):esc(r.type)+(r.table?" · "+esc(r.table):"")}</td>
     <td><span class="pill ${r.pay.toLowerCase()}">${esc(r.pay)}</span></td>
-    <td class="r mono">${r.items}</td><td class="r mono">${inr0(r.total)}</td>
+    <td class="r mono">${r.items}</td><td class="r mono">${r.type==="Online"?"—":inr0(r.total)}</td>
     <td class="r"><button class="linkbtn" data-no="${esc(r.no)}">View</button></td></tr>`).join("")
-    :`<tr><td colspan="8" style="text-align:center;color:var(--ink-3);padding:30px">No bills on this day yet.</td></tr>`;
-  document.querySelectorAll("#rtable .linkbtn").forEach(b=>b.onclick=()=>openReceipt(receipts.find(r=>r.no===b.dataset.no),false));
+    :`<tr><td colspan="9" style="text-align:center;color:var(--ink-3);padding:30px">No bills on this day yet.</td></tr>`;
+  document.querySelectorAll("#rtable .linkbtn").forEach(b=>b.onclick=()=>openReceipt(list.find(r=>r.no===b.dataset.no),false));
   const qty={};list.forEach(r=>r.lines.forEach(l=>qty[l.name]=(qty[l.name]||0)+l.qty));
   const top=Object.entries(qty).sort((a,b)=>b[1]-a[1]).slice(0,7), mx=top[0]?top[0][1]:1;
   $("#topday").textContent=new Date(day+"T00:00").toLocaleDateString("en-IN",{day:"numeric",month:"short"});
   $("#bars").innerHTML=top.length?top.map(([n,v])=>`<div class="bar"><div class="lbl"><span>${esc(n)}</span><b>${v} sold</b></div><div class="track"><div class="fill" style="width:${v/mx*100}%"></div></div></div>`).join(""):`<div class="hint" style="padding:10px 0">Best sellers appear here once bills come in.</div>`;
 }
 $("#csv").onclick=()=>{
-  const day=$("#sday").value;const list=receipts.filter(r=>dkey(r.ts)===day);
-  let s="Bill No,Date,Time,Customer,Mobile,Type,Payment,Items,Subtotal,Discount,CGST,SGST,Total\n";
-  list.forEach(r=>{const d=new Date(r.ts);s+=[r.no,d.toLocaleDateString("en-IN"),d.toLocaleTimeString("en-IN"),`"${(r.cust||"").replace(/"/g,'""')}"`,r.phone,r.type,r.pay,r.items,r.sub,r.disc,r.cgst,r.sgst,r.total].join(",")+"\n"});
+  const day=$("#sday").value;const list=dayList(day);
+  let s="Bill No,Date,Time,Billed by,Customer,Mobile,Type,Payment,Items,Subtotal,Discount,CGST,SGST,Total\n";
+  list.forEach(r=>{const d=new Date(r.ts);s+=[r.no,d.toLocaleDateString("en-IN"),d.toLocaleTimeString("en-IN"),`"${(r.staff||"").replace(/"/g,'""')}"`,`"${(r.cust||"").replace(/"/g,'""')}"`,r.phone,r.type,r.pay,r.items,r.sub,r.disc,r.cgst,r.sgst,r.total].join(",")+"\n"});
   copy(s,`${list.length} bills copied — paste into Excel`);
 };
 
 /* Menu editor */
-function saveMenu(){store.set("menu",menu);renderCats();renderGrid();renderBill()}
+function saveMenu(){store.set("menu",menu);renderCats();renderGrid();renderBill();pushConfig("menu")}
 function renderEditor(){
   const av=menu.filter(m=>m.avail).length;
   $("#availhint").textContent=`${av} of ${menu.length} items available today · changes save automatically`;
@@ -1057,6 +1187,7 @@ function renderStock(){
   $("#stable").querySelectorAll("[data-gdel]").forEach(b=>b.onclick=()=>{
     const id=b.closest("tr").dataset.g;
     if(!b.dataset.armed){b.dataset.armed=1;b.textContent="Remove?";b.style.color="var(--danger)";setTimeout(()=>{b.textContent="✕";b.style.color="";delete b.dataset.armed},2500);return}
+    if(isCloud()){call("removeGrocery",{id}).then(j=>{applyServer(j);renderStock();toast("Grocery removed")}).catch(e=>toast(e instanceof ServerError?e.message:"You are offline. Try again when connected."));return}
     groceries=groceries.filter(g=>g.id!==id);Object.keys(recipes).forEach(k=>recipes[k]=recipes[k].filter(([g])=>g!==id));saveG();renderStock();renderGrid();toast("Grocery removed");
   });
   // shopping list
@@ -1070,7 +1201,17 @@ function renderStock(){
   renderRecipes();
 }
 function buyQty(g){const target=g.alert*4;const q=Math.max(target-g.stock,g.alert);return big(g.unit)?Math.ceil(q*2)/2:Math.ceil(q)}
-function saveAll(){
+async function saveAll(){
+  if(isCloud()){
+    const items=[],alerts={};
+    $("#stable").querySelectorAll("tr[data-g]").forEach(tr=>{const id=tr.dataset.g,v=parseFloat(tr.querySelector("[data-recv]").value),a=parseFloat(tr.querySelector("[data-alert]").value);
+      if(v>0)items.push({id,qty:v});if(!isNaN(a)&&a>=0)alerts[id]=a});
+    $("#saveall").disabled=$("#saveall2").disabled=true;
+    try{applyServer(await call("addStock",{items,alerts}));renderStock();renderGrid();toast(items.length?`Saved stock for ${items.length} groceries`:"Alert levels saved")}
+    catch(e){toast(e instanceof ServerError?e.message:"You are offline. Stock was not saved. Try again when connected.")}
+    finally{$("#saveall").disabled=$("#saveall2").disabled=false}
+    return;
+  }
   let n=0;
   $("#stable").querySelectorAll("tr[data-g]").forEach(tr=>{
     const g=gById(tr.dataset.g);if(!g)return;
@@ -1092,6 +1233,7 @@ $("#gaddform").addEventListener("submit",e=>{
   e.preventDefault();
   const name=$("#g-name").value.trim();if(!name)return;
   const g={id:"g"+Date.now(),name,unit:$("#g-unit").value,stock:Math.max(0,parseFloat($("#g-stock").value)||0),alert:Math.max(0,parseFloat($("#g-alert").value)||0)};
+  if(isCloud()){call("addGrocery",{grocery:g}).then(j=>{applyServer(j);e.target.reset();renderStock();toast(`${name} added`)}).catch(err=>toast(err instanceof ServerError?err.message:"You are offline. Try again when connected."));return}
   groceries.push(g);if(g.stock)logG(g.name,"+"+fmt(g.stock,g.unit),"Opening stock",false);
   e.target.reset();saveG();renderStock();toast(`${name} added`);
 });
@@ -1106,41 +1248,152 @@ function renderRecipes(){
   </div>`}).join("");
   $("#recipes").querySelectorAll(".rc").forEach(card=>{
     const id=card.dataset.m;recipes[id]=recipes[id]||[];
-    card.querySelectorAll("[data-rq]").forEach(inp=>inp.addEventListener("change",()=>{recipes[id][+inp.dataset.rq][1]=Math.max(0,parseFloat(inp.value)||0);saveG();toast("Saved")}));
-    card.querySelectorAll("[data-rx]").forEach(b=>b.onclick=()=>{recipes[id].splice(+b.dataset.rx,1);saveG();renderStock();renderGrid()});
+    card.querySelectorAll("[data-rq]").forEach(inp=>inp.addEventListener("change",()=>{recipes[id][+inp.dataset.rq][1]=Math.max(0,parseFloat(inp.value)||0);saveRecipes();toast("Saved")}));
+    card.querySelectorAll("[data-rx]").forEach(b=>b.onclick=()=>{recipes[id].splice(+b.dataset.rx,1);saveRecipes();renderStock();renderGrid()});
     const sel=card.querySelector(".rc-add select"),qi=card.querySelector(".rc-add input");
     card.querySelector(".rc-add button").onclick=()=>{const q=parseFloat(qi.value);if(!(q>0))return toast("Enter the quantity per plate");
-      const ex=recipes[id].find(([g])=>g===sel.value);if(ex)ex[1]=q;else recipes[id].push([sel.value,q]);saveG();renderStock();renderGrid();toast("Grocery linked")};
+      const ex=recipes[id].find(([g])=>g===sel.value);if(ex)ex[1]=q;else recipes[id].push([sel.value,q]);saveRecipes();renderStock();renderGrid();toast("Grocery linked")};
   });
 }
 
-/* Sync with employee (Google Sheet via Apps Script) */
-let requests=store.get("gRequests",[]), syncOk=false, lastSync=0, pushTimer=null;
-const syncOn=()=>!!(settings.syncUrl&&settings.syncKey);
-async function api(action,extra){
-  const res=await fetch(settings.syncUrl,{method:"POST",body:JSON.stringify(Object.assign({key:settings.syncKey,action},extra||{}))});
-  const j=await res.json();
-  if(!j.ok)throw new Error(j.error||"Sync failed");
-  if(j.requests){requests=j.requests;store.set("gRequests",requests)}
-  syncOk=true;lastSync=Date.now();renderSync();return j;
+/* ===== Google Sheet (shared for the whole team) ===== */
+const CLOUD_URL=/^https:\/\/script\.google\.com\//.test(window.CC_SERVER_URL||"")?window.CC_SERVER_URL:"";
+const inGAS=!!(window.google&&google.script&&google.script.run);
+let auth=store.get("auth",null);              // {pin,name,role}
+let cloudUrl=CLOUD_URL||settings.cloudUrl||"";
+const cloudOn=()=>inGAS||!!cloudUrl;
+const isCloud=()=>cloudOn()&&!!auth;
+const isAdmin=()=>!isCloud()||auth.role==="admin";
+let requests=store.get("gRequests",[]), online=false, lastSync=0, cfgVer=store.get("cfgVer",null);
+let outbox=store.get("outbox",[]);
+const SHARED=["name","phone","addr","gstin","fssai","upi","prefix","foot","gst","parcelOn","parcelAmt","parcelMode","parcelTk"];
+function rpc(payload){
+  const p=inGAS?new Promise((res,rej)=>google.script.run.withSuccessHandler(t=>{try{res(JSON.parse(t))}catch(e){rej(e)}}).withFailureHandler(e=>rej(e)).api(payload))
+    :fetch(cloudUrl,{method:"POST",body:JSON.stringify(payload)}).then(r=>r.json());
+  return Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")),payload.action==="addSale"?15000:25000))]);
 }
-function syncFail(e){syncOk=false;renderSync(e&&e.message)}
-function pushNow(){if(!syncOn())return Promise.resolve();return api("pushGroceries",{groceries:groceries.map(({id,name,unit,stock,alert})=>({id,name,unit,stock,alert}))}).catch(syncFail)}
-function schedulePush(){if(!syncOn())return;clearTimeout(pushTimer);pushTimer=setTimeout(pushNow,1500)}
-function pullRequests(){if(!syncOn())return Promise.resolve();return api("getRequests").catch(syncFail)}
-function renderSync(err){
+class ServerError extends Error{}
+async function call(action,extra){
+  let j;
+  try{j=await rpc(Object.assign({pin:auth&&auth.pin,name:auth&&auth.name,action},extra||{}))}
+  catch(e){setOnline(false);throw e}
+  setOnline(true);
+  if(!j.ok){if(j.auth&&auth){signOut("Your PIN was changed. Sign in again.")}throw new ServerError(j.error||"Server error")}
+  if(j.ver)cfgVer=j.ver,store.set("cfgVer",cfgVer);
+  return j;
+}
+function setOnline(v){online=v;if(v)lastSync=Date.now();renderSync()}
+function renderSync(){
   const t=lastSync?new Date(lastSync).toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"}):"";
-  const msg=!syncOn()?"Not connected. Add the sync URL in Settings to share groceries with your employee."
-    :err?`Sync problem: ${err}`:syncOk?`Connected · synced ${t}`:"Connecting…";
+  const wait=outbox.length?` · ${outbox.length} bill${outbox.length>1?"s":""} waiting to upload`:"";
+  const msg=!cloudOn()?"Not connected. Bills are saved only on this computer."
+    :!auth?"Not signed in":online?`Connected · synced ${t}${wait}`:`Offline · bills are kept on this device and uploaded when the internet is back${wait}`;
   $("#syncstate").textContent=msg;$("#reqsync").textContent=msg;
-  $("#syncstate").style.color=$("#reqsync").style.color=err?"var(--danger)":"";
+  $("#syncstate").style.color=$("#reqsync").style.color=(cloudOn()&&auth&&!online)?"var(--danger)":"";
+  $("#acct").hidden=!isCloud();
+  if(isCloud()){$("#acctname").textContent=`${auth.name} · ${auth.role==="admin"?"Owner":"Team"}`;$("#acctdot").classList.toggle("off",!online)}
+  $("#outboxnote").textContent=outbox.length?`${outbox.length} bill(s) waiting to upload`:"";
   renderRequests();
 }
+function applyRole(){
+  document.body.classList.toggle("cloud",isCloud());
+  document.body.classList.toggle("staff",isCloud()&&!isAdmin());
+  ["stock","menu"].forEach(v=>{const t=document.querySelector(`.tab[data-view="${v}"]`);t.hidden=isCloud()&&!isAdmin()});
+  $("#s-urlwrap").hidden=inGAS||!!CLOUD_URL;
+  $("#synctest").hidden=inGAS||!!CLOUD_URL||isCloud();
+  $("#logout").hidden=!isCloud();
+}
+function sameJSON(a,b){return JSON.stringify(a)===JSON.stringify(b)}
+function applyServer(j){
+  let gridDirty=false;
+  if(j.config){
+    if(j.config.menu&&!sameJSON(j.config.menu,menu)){menu=j.config.menu;menu.forEach(m=>{if(m.avail===undefined)m.avail=true;if(m.on===undefined)m.on=true});store.set("menu",menu);gridDirty=true;if(!$("#v-menu").hidden)renderEditor()}
+    if(j.config.recipes&&!sameJSON(j.config.recipes,recipes)){recipes=j.config.recipes;store.set("recipes",recipes);gridDirty=true}
+    if(j.config.settings){const before=JSON.stringify(settings);SHARED.forEach(k=>{if(k in j.config.settings)settings[k]=j.config.settings[k]});
+      if(JSON.stringify(settings)!==before){store.set("settings",settings);gridDirty=true;if(!$("#v-settings").hidden)renderSettings()}}
+  }
+  if(j.groceries&&!sameJSON(j.groceries,groceries)){groceries=j.groceries;store.set("groceries",groceries);gridDirty=true}
+  if(j.requests){requests=j.requests;store.set("gRequests",requests)}
+  if(j.log){gLog=j.log;store.set("gLog",gLog)}
+  if(gridDirty){renderCats();renderGrid();renderBill()}
+  if(!$("#v-stock").hidden&&(gridDirty||j.log))renderStock();
+  renderSync();
+}
+// owner edits go to the sheet so every device gets them
+function pushConfig(key){
+  if(!isCloud())return;
+  const value=key==="settings"?Object.fromEntries(SHARED.map(k=>[k,settings[k]])):key==="menu"?menu:recipes;
+  call("saveConfig",{key,value}).catch(e=>toast(e instanceof ServerError?e.message:"Saved here. It will reach the sheet when you are back online."));
+}
+async function boot(){
+  applyRole();renderSync();
+  if(!isCloud())return;
+  try{
+    let j=await call("boot");
+    if(!j.config||!j.groceries.length){
+      if(auth.role==="admin"){j=await call("seed",{config:{menu,recipes,settings:Object.fromEntries(SHARED.map(k=>[k,settings[k]]))},groceries});toast("Menu and groceries copied to the Google Sheet")}
+      else toast("The owner needs to sign in once to set up the menu.");
+    }
+    applyServer(j);
+    flushOutbox();
+    if(!$("#v-sales").hidden)renderSales();
+  }catch(e){if(!(e instanceof ServerError))toast("Working offline. Bills will upload when the internet is back.")}
+}
+async function poll(){
+  if(!isCloud()||document.hidden)return;
+  try{
+    const j=await call("poll",{ver:cfgVer,withLog:!$("#v-stock").hidden});
+    applyServer(j);
+    await flushOutbox();
+    if(!$("#v-sales").hidden&&$("#sday").value===dkey(Date.now()))renderSales(true);
+  }catch(e){}
+}
+setInterval(poll,20000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)poll()});
+async function flushOutbox(){
+  while(outbox.length){
+    const sale=outbox[0];
+    try{await call("addSale",{sale})}catch(e){if(e instanceof ServerError){toast("Bill "+sale.offlineNo+" could not upload: "+e.message)}return}
+    outbox.shift();store.set("outbox",outbox);
+    const r=receipts.find(x=>x.no===sale.offlineNo);if(r){delete r.offline;store.set("receipts",receipts)}
+  }
+  renderSync();
+}
+function signOut(msg){auth=null;store.set("auth",null);applyRole();renderSync();showLogin(msg)}
+function showLogin(msg){
+  if(!cloudOn())return;
+  $("#loginwrap").hidden=false;$("#l-err").textContent=msg||"";
+  $("#l-urlwrap").hidden=inGAS||!!cloudUrl;
+  $("#l-name").value=(store.get("lastName","")||"");setTimeout(()=>($("#l-name").value?$("#l-pin"):$("#l-name")).focus(),50);
+}
+$("#loginform").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const name=$("#l-name").value.trim(), pin=$("#l-pin").value.trim();
+  if(!$("#l-urlwrap").hidden){const u=$("#l-url").value.trim();if(!/^https:\/\//.test(u))return $("#l-err").textContent="Paste the web app link that starts with https://";cloudUrl=u;settings.cloudUrl=u;store.set("settings",settings)}
+  if(!name||!pin)return $("#l-err").textContent="Enter your name and PIN.";
+  $("#l-go").disabled=true;$("#l-err").textContent="";
+  try{
+    const j=await rpc({pin,name,action:"login"});
+    if(!j.ok){$("#l-err").textContent=j.auth?"Wrong PIN. Ask the owner for the team PIN.":j.error;return}
+    auth={pin,name,role:j.role};store.set("auth",auth);store.set("lastName",name);
+    $("#loginwrap").hidden=true;$("#l-pin").value="";
+    toast(`Welcome, ${name}`);boot();
+  }catch(err){$("#l-err").textContent="Could not reach the server. Check the internet and the link."}
+  finally{$("#l-go").disabled=false}
+});
+$("#acct").onclick=()=>{const b=$("#acct");if(!b.dataset.armed){b.dataset.armed=1;$("#acctname").textContent="Tap again to sign out";setTimeout(()=>{delete b.dataset.armed;renderSync()},2500);return}signOut()};
+$("#logout").onclick=()=>signOut();
+$("#synctest").onclick=()=>{
+  const u=$("#s-syncurl").value.trim();
+  if(!/^https:\/\//.test(u))return toast("Paste the web app link that starts with https://");
+  cloudUrl=u;settings.cloudUrl=u;store.set("settings",settings);showLogin();
+};
 function renderRequests(){
   const open=requests.filter(r=>r.status==="Pending"||r.status==="Approved").sort((a,b)=>(a.status===b.status?0:a.status==="Pending"?-1:1)||b.created-a.created);
   const done=requests.filter(r=>!(r.status==="Pending"||r.status==="Approved")).sort((a,b)=>b.updated-a.updated).slice(0,15);
   const pend=requests.filter(r=>r.status==="Pending").length;
-  $("#reqbadge").hidden=!pend;$("#reqbadge").textContent=pend;
+  $("#reqbadge").hidden=!pend||!isAdmin();$("#reqbadge").textContent=pend;
+  $("#reqcard").hidden=!requests.length;
   const when=ts=>new Date(ts).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
   const unitOf=r=>r.unit||"";
   $("#reqs").innerHTML=(open.length?open.map(r=>`<div class="rq ${r.status==="Pending"?"pend":"appr"}" data-r="${esc(r.id)}">
@@ -1149,7 +1402,7 @@ function renderRequests(){
       ${r.note?`<div class="rq-note">${esc(r.note)}</div>`:""}
       ${r.status==="Pending"?`<div class="rq-act"><input class="note" placeholder="Reply (optional)" data-note><button class="go" data-do="Approved">Approve</button><button class="no" data-do="Rejected">Reject</button></div>`
         :`<div class="rq-act"><input type="number" min="0" step="any" value="${Number(r.qty)}" data-qty aria-label="Quantity received"><span class="hint">${esc(unitOf(r))} came in</span><button class="go" data-do="Received">Mark received</button></div>`}
-    </div>`).join(""):`<div class="hint" style="padding:6px 0">${syncOn()?"No open requests.":"Requests from your employee will appear here."}</div>`)
+    </div>`).join(""):`<div class="hint" style="padding:6px 0">${isCloud()?"No open requests.":"Requests from your grocery employee appear here once you sign in with the Google Sheet."}</div>`)
     +(done.length?`<details class="older"><summary>Recent handled (${done.length})</summary>${done.map(r=>`<div class="rq-meta" style="padding:4px 0">${esc(r.grocery)} · ${fmt(Number(r.qty),unitOf(r))} · ${esc(r.employee)} · <span class="pill ${esc(r.status)}">${esc(r.status)}</span></div>`).join("")}</details>`:"");
   $("#reqs").querySelectorAll("[data-do]").forEach(b=>b.onclick=async()=>{
     const card=b.closest(".rq"), r=requests.find(x=>x.id===card.dataset.r), st=b.dataset.do;
@@ -1158,35 +1411,23 @@ function renderRequests(){
     if(st==="Received"&&!(qty>0))return toast("Enter the quantity that came in");
     card.querySelectorAll("button").forEach(x=>x.disabled=true);
     try{
-      await api("updateRequest",{id:r.id,status:st,qty,adminNote:note===undefined?undefined:note});
-      if(st==="Received"){const g=gById(r.groceryId);
-        if(g){g.stock=Math.round((g.stock+qty)*1000)/1000;logG(g.name,"+"+fmt(qty,g.unit),`Received · request by ${r.employee}`,false);saveG();renderGrid()}}
+      applyServer(await call("updateRequest",{id:r.id,status:st,qty,adminNote:note===undefined?undefined:note}));
       renderStock();toast(st==="Approved"?"Approved · employee can buy it":st==="Rejected"?"Request rejected":"Stock added");
-    }catch(e){toast(e.message||"Could not update. Check internet.");card.querySelectorAll("button").forEach(x=>x.disabled=false)}
+    }catch(e){toast(e instanceof ServerError?e.message:"Could not update. Check internet.");card.querySelectorAll("button").forEach(x=>x.disabled=false)}
   });
 }
-$("#reqrefresh").onclick=()=>{if(!syncOn())return toast("Connect sync in Settings first");pullRequests().then(()=>toast("Requests updated"))};
-$("#synctest").onclick=async()=>{
-  settings.syncUrl=$("#s-syncurl").value.trim();settings.syncKey=$("#s-synckey").value.trim();store.set("settings",settings);
-  if(!syncOn())return toast("Enter the URL and admin key");
-  $("#synctest").disabled=true;$("#syncstate").textContent="Connecting…";
-  try{await api("pushGroceries",{groceries:groceries.map(({id,name,unit,stock,alert})=>({id,name,unit,stock,alert}))});toast("Connected · stock shared with employee")}
-  catch(e){syncFail(e);toast("Could not connect: "+e.message)}
-  finally{$("#synctest").disabled=false}
-};
-setInterval(()=>{if(syncOn()&&!document.hidden)pullRequests()},60000);
+$("#reqrefresh").onclick=()=>{if(!isCloud())return toast("Sign in with the Google Sheet first");poll().then(()=>toast("Requests updated"))};
 
 /* Settings */
 const SF={name:"s-name",phone:"s-phone",addr:"s-addr",gstin:"s-gstin",fssai:"s-fssai",upi:"s-upi",prefix:"s-prefix",foot:"s-foot"};
-function renderParcel(){$("#s-parcel").checked=!!settings.parcelOn;$("#s-parcelamt").value=settings.parcelAmt??"";$("#s-parcelmode").value=settings.parcelMode||"order";$("#s-parceltk").checked=!!settings.parcelTk;$("#parcelfields").classList.toggle("off",!settings.parcelOn)}
-function saveParcel(msg){store.set("settings",settings);renderParcel();renderBill();if(msg)toast(msg)}
+function renderParcel(){$("#s-parcel").checked=!!settings.parcelOn;$("#s-parcelamt").value=settings.parcelAmt??"";$("#s-parcelmode").value=settings.parcelMode||"order";$("#parcelfields").classList.toggle("off",!settings.parcelOn)}
+function saveParcel(msg){store.set("settings",settings);renderParcel();renderBill();pushConfig("settings");if(msg)toast(msg)}
 $("#s-parcel").addEventListener("change",e=>{settings.parcelOn=e.target.checked;saveParcel(settings.parcelOn?"Parcel charge on":"Parcel charge off")});
 $("#s-parcelamt").addEventListener("change",e=>{settings.parcelAmt=Math.max(0,parseFloat(e.target.value)||0);saveParcel("Parcel charge saved")});
 $("#s-parcelmode").addEventListener("change",e=>{settings.parcelMode=e.target.value;saveParcel("Saved")});
-$("#s-parceltk").addEventListener("change",e=>{settings.parcelTk=e.target.checked;saveParcel("Saved")});
-function renderSettings(){renderParcel();$("#s-syncurl").value=settings.syncUrl||"";$("#s-synckey").value=settings.syncKey||"";Object.entries(SF).forEach(([k,id])=>$("#"+id).value=settings[k]||"");$("#s-paper").value=settings.paper||"80";$("#s-gst").checked=!!settings.gst}
-Object.entries(SF).forEach(([k,id])=>$("#"+id).addEventListener("change",e=>{settings[k]=e.target.value.trim();store.set("settings",settings);renderBill();toast("Saved")}));
-$("#s-gst").addEventListener("change",e=>{settings.gst=e.target.checked;store.set("settings",settings);renderBill();toast(settings.gst?"GST on":"GST off")});
+function renderSettings(){renderParcel();applyRole();$("#s-syncurl").value=cloudUrl||"";Object.entries(SF).forEach(([k,id])=>$("#"+id).value=settings[k]||"");$("#s-paper").value=settings.paper||"80";$("#s-gst").checked=!!settings.gst}
+Object.entries(SF).forEach(([k,id])=>$("#"+id).addEventListener("change",e=>{settings[k]=e.target.value.trim();store.set("settings",settings);renderBill();pushConfig("settings");toast("Saved")}));
+$("#s-gst").addEventListener("change",e=>{settings.gst=e.target.checked;store.set("settings",settings);renderBill();pushConfig("settings");toast(settings.gst?"GST on":"GST off")});
 $("#s-paper").addEventListener("change",e=>{settings.paper=e.target.value;store.set("settings",settings);toast("Receipt paper saved")});
 let wipeArmed=false;
 $("#wipe").onclick=()=>{
@@ -1195,9 +1436,10 @@ $("#wipe").onclick=()=>{
 };
 
 /* Start with a sample order so the bill panel shows how it works */
-if(!receipts.length){cart={m1:2,m3:1,m15:2}}
+if(!receipts.length&&!cloudOn()){cart={m1:2,m3:1,m15:2}}
 renderCats();renderGrid();renderBill();
-renderSync();if(syncOn())pushNow();
+applyRole();renderSync();
+if(cloudOn()&&!auth)showLogin();else boot();
 })();
 </script>
 
