@@ -440,7 +440,7 @@ body.cloud .local-only{display:none!important}
     <h2>Sign in to billing</h2>
     <p class="hint">Every bill you make is saved to the cafe's Google Sheet with your name.</p>
     <div class="field" id="l-urlwrap" hidden><label for="l-url">Server link (Apps Script web app URL)</label><input id="l-url" placeholder="https://script.google.com/macros/s/…/exec"></div>
-    <div class="field"><label for="l-name">Your name</label><input id="l-name" autocomplete="name" placeholder="e.g. Priya" required></div>
+    <div class="field"><label for="l-name">Your name</label><input id="l-name" autocomplete="name" placeholder="e.g. Lucky" required></div>
     <div class="field"><label for="l-pin">PIN</label><input id="l-pin" type="password" inputmode="numeric" placeholder="Team or owner PIN" required></div>
     <div class="err" id="l-err"></div>
     <button class="btn btn-primary" id="l-go" type="submit">Sign in</button>
@@ -1297,8 +1297,8 @@ function renderSync(){
 }
 function applyRole(){
   document.body.classList.toggle("cloud",isCloud());
-  document.body.classList.toggle("staff",isCloud()&&!isAdmin());
-  ["stock","menu"].forEach(v=>{const t=document.querySelector(`.tab[data-view="${v}"]`);t.hidden=isCloud()&&!isAdmin()});
+  document.body.classList.remove("staff");
+  ["stock","menu"].forEach(v=>{document.querySelector(`.tab[data-view="${v}"]`).hidden=false});
   $("#s-urlwrap").hidden=inGAS||!!CLOUD_URL;
   $("#synctest").hidden=inGAS||!!CLOUD_URL||isCloud();
   $("#logout").hidden=!isCloud();
@@ -1392,7 +1392,7 @@ function renderRequests(){
   const open=requests.filter(r=>r.status==="Pending"||r.status==="Approved").sort((a,b)=>(a.status===b.status?0:a.status==="Pending"?-1:1)||b.created-a.created);
   const done=requests.filter(r=>!(r.status==="Pending"||r.status==="Approved")).sort((a,b)=>b.updated-a.updated).slice(0,15);
   const pend=requests.filter(r=>r.status==="Pending").length;
-  $("#reqbadge").hidden=!pend||!isAdmin();$("#reqbadge").textContent=pend;
+  $("#reqbadge").hidden=!pend;$("#reqbadge").textContent=pend;
   $("#reqcard").hidden=!requests.length;
   const when=ts=>new Date(ts).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
   const unitOf=r=>r.unit||"";
