@@ -440,8 +440,8 @@ body.cloud .local-only{display:none!important}
     <h2>Sign in to billing</h2>
     <p class="hint">Every bill you make is saved to the cafe's Google Sheet with your name.</p>
     <div class="field" id="l-urlwrap" hidden><label for="l-url">Server link (Apps Script web app URL)</label><input id="l-url" placeholder="https://script.google.com/macros/s/…/exec"></div>
-    <div class="field"><label for="l-name">Your name</label><input id="l-name" autocomplete="name" placeholder="e.g. Lucky" required></div>
-    <div class="field"><label for="l-pin">PIN</label><input id="l-pin" type="password" inputmode="numeric" placeholder="Team or owner PIN" required></div>
+    <div class="field"><label for="l-name">Your name</label><input id="l-name" autocomplete="username" placeholder="e.g. Nischith" required></div>
+    <div class="field"><label for="l-pin">Password</label><input id="l-pin" type="password" inputmode="numeric" placeholder="Your password" required></div>
     <div class="err" id="l-err"></div>
     <button class="btn btn-primary" id="l-go" type="submit">Sign in</button>
   </form>
@@ -1278,7 +1278,7 @@ async function call(action,extra){
   try{j=await rpc(Object.assign({pin:auth&&auth.pin,name:auth&&auth.name,action},extra||{}))}
   catch(e){setOnline(false);throw e}
   setOnline(true);
-  if(!j.ok){if(j.auth&&auth){signOut("Your PIN was changed. Sign in again.")}throw new ServerError(j.error||"Server error")}
+  if(!j.ok){if(j.auth&&auth){signOut("Your password was changed. Sign in again.")}throw new ServerError(j.error||"Server error")}
   if(j.ver)cfgVer=j.ver,store.set("cfgVer",cfgVer);
   return j;
 }
@@ -1291,7 +1291,7 @@ function renderSync(){
   $("#syncstate").textContent=msg;$("#reqsync").textContent=msg;
   $("#syncstate").style.color=$("#reqsync").style.color=(cloudOn()&&auth&&!online)?"var(--danger)":"";
   $("#acct").hidden=!isCloud();
-  if(isCloud()){$("#acctname").textContent=`${auth.name} · ${auth.role==="admin"?"Owner":"Team"}`;$("#acctdot").classList.toggle("off",!online)}
+  if(isCloud()){$("#acctname").textContent=auth.name;$("#acctdot").classList.toggle("off",!online)}
   $("#outboxnote").textContent=outbox.length?`${outbox.length} bill(s) waiting to upload`:"";
   renderRequests();
 }
@@ -1370,12 +1370,12 @@ $("#loginform").addEventListener("submit",async e=>{
   e.preventDefault();
   const name=$("#l-name").value.trim(), pin=$("#l-pin").value.trim();
   if(!$("#l-urlwrap").hidden){const u=$("#l-url").value.trim();if(!/^https:\/\//.test(u))return $("#l-err").textContent="Paste the web app link that starts with https://";cloudUrl=u;settings.cloudUrl=u;store.set("settings",settings)}
-  if(!name||!pin)return $("#l-err").textContent="Enter your name and PIN.";
+  if(!name||!pin)return $("#l-err").textContent="Enter your name and password.";
   $("#l-go").disabled=true;$("#l-err").textContent="";
   try{
     const j=await rpc({pin,name,action:"login"});
-    if(!j.ok){$("#l-err").textContent=j.auth?"Wrong PIN. Ask the owner for the team PIN.":j.error;return}
-    auth={pin,name,role:j.role};store.set("auth",auth);store.set("lastName",name);
+    if(!j.ok){$("#l-err").textContent=j.auth?"Wrong name or password.":j.error;return}
+    auth={pin,name:j.name||name,role:j.role};store.set("auth",auth);store.set("lastName",name);
     $("#loginwrap").hidden=true;$("#l-pin").value="";
     toast(`Welcome, ${name}`);boot();
   }catch(err){$("#l-err").textContent="Could not reach the server. Check the internet and the link."}
